@@ -5,46 +5,42 @@
 #                                                     +:+ +:+         +:+      #
 #    By: fcouserg <fcouserg@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2023/11/14 18:59:07 by fcouserg          #+#    #+#              #
-#    Updated: 2023/11/23 17:46:38 by fcouserg         ###   ########.fr        #
+#    Created: 2024/08/17 18:29:03 by fcouserg          #+#    #+#              #
+#    Updated: 2024/09/13 17:50:23 by fcouserg         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
+NAME		=	philo
 
-NAME				= philo
+CC			=	cc
+INC			=	inc/
+CFLAGS		=	-Wall -Wextra -Werror -I -pthread
+DEP_FLAGS	:=	-MMD -MP
+RM			=	rm -rf
 
-# Directories
-INC					= inc/
-SRC_DIR				= src/
-OBJ_DIR				= obj/
+PHILO	= main.c parsing.c threads.c init.c monitor.c utils.c
 
-# Compiler and CFlags
-CC					= cc
-CFLAGS				= -Wall -Werror -Wextra -pthread #-fsanitize=address
-RM					= rm -f
+SRC_NAMES	= $(PHILO)
 
-SRC					= actions.c main.c threads.c utils.c
-OBJ					= $(SRC:%.c=$(OBJ_DIR)%.o)
+OBJ	= $(SRC_NAMES:.c=.o)
+DEP	= $(SRC_NAMES:.c=.d)
 
-all:				$(NAME)	
+%.o: %.c
+	$(CC) $(DEP_FLAGS) $(CFLAGS) -c $< -o $@
 
-$(NAME):			$(OBJ)
-					@$(CC) $(CFLAGS) -I$(INC) $(OBJ) -o $(NAME)
-					@echo "\033[0;92m* file was created *\033[0m"
-					
+$(NAME): $(OBJ)
+	$(CC) $(DEP_FLAGS) $(CFLAGS) $(OBJ) -o $(NAME)
 
-$(OBJ_DIR)%.o:		$(SRC_DIR)%.c 
-					@mkdir -p $(@D)
-					@$(CC) $(CFLAGS) -I$(INC) -c $< -o $@
+all: $(NAME)
 
 clean:
-					@$(RM) -r $(OBJ_DIR)
-					@echo "\033[0;91m* object files were deleted *\033[0m"
+		$(RM) $(OBJ) $(DEP)
 
-fclean:				clean
-					@$(RM) $(NAME)
-					@echo "\033[0;91m* all files were deleted *\033[0m"
+fclean:		clean
+			$(RM) $(NAME)
 
-re:					fclean all
+re:		fclean all 
+			
+.PHONY:	all clean fclean re 
 
-.PHONY:				start all clean fclean re bonus
+-include $(DEP)
